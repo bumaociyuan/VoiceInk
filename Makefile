@@ -4,6 +4,7 @@ WHISPER_CPP_DIR := $(DEPS_DIR)/whisper.cpp
 FRAMEWORK_PATH := $(WHISPER_CPP_DIR)/build-apple/whisper.xcframework
 LOCAL_DERIVED_DATA := $(CURDIR)/.local-build
 LOCAL_CODESIGN_IDENTITY ?=
+LOCAL_XCODEBUILD_FLAGS ?=
 
 .PHONY: all clean whisper setup build local check healthcheck help dev run release release-setup
 
@@ -67,7 +68,7 @@ local: check setup
 		SIGNING_REQUIRED=NO; \
 		echo "Using ad-hoc signing (permissions may need approval after rebuilds)"; \
 	fi; \
-	xcodebuild -project VoiceInk.xcodeproj -scheme VoiceInk -configuration Debug \
+	xcodebuild $(LOCAL_XCODEBUILD_FLAGS) -project VoiceInk.xcodeproj -scheme VoiceInk -configuration Debug \
 		-derivedDataPath "$(LOCAL_DERIVED_DATA)" \
 		-xcconfig LocalBuild.xcconfig \
 		CODE_SIGN_IDENTITY="$$SIGNING_IDENTITY" \
