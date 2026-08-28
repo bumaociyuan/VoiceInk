@@ -43,7 +43,7 @@ jobs:
         run: >-
           make local
           LOCAL_CODESIGN_IDENTITY=-
-          LOCAL_XCODEBUILD_FLAGS="-skipMacroValidation -onlyUsePackageVersionsFromResolvedFile"
+          LOCAL_XCODEBUILD_FLAGS="-skipMacroValidation -skipPackagePluginValidation -onlyUsePackageVersionsFromResolvedFile"
 
       - name: Verify and package app
         run: |
