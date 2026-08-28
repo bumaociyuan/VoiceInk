@@ -1,0 +1,68 @@
+name: Build local VoiceInk
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/build-local.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-local-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ad-hoc signed app
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Show build environment
+        run: |
+          uname -m
+          xcodebuild -version
+          xcrun swift --version
+
+      - name: Cache whisper.cpp framework
+        uses: actions/cache@v4
+        with:
+          path: ~/VoiceInk-Dependencies/whisper.cpp
+          key: whisper-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Makefile') }}
+          restore-keys: |
+            whisper-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Build VoiceInk
+        run: make local LOCAL_CODESIGN_IDENTITY=-
+
+      - name: Verify and package app
+        run: |
+          set -euo pipefail
+          app="$HOME/Downloads/VoiceInk.app"
+          test -d "$app"
+          codesign --verify --deep --strict --verbose=2 "$app"
+          executable="$app/Contents/MacOS/VoiceInk"
+          file "$executable"
+          lipo -info "$executable"
+          archive="VoiceInk-${GITHUB_SHA::7}-arm64.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$app" "$archive"
+          shasum -a 256 "$archive" > "$archive.sha256"
+
+      - name: Upload VoiceInk app
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoiceInk-${{ github.sha }}-arm64
+          path: |
+            VoiceInk-*-arm64.zip
+            VoiceInk-*-arm64.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
