@@ -23,7 +23,9 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Show build environment
         run: |
@@ -35,7 +37,7 @@ jobs:
         run: xcodebuild -downloadComponent MetalToolchain
 
       - name: Cache whisper.cpp framework
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/VoiceInk-Dependencies/whisper.cpp
           key: whisper-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Makefile') }}
@@ -62,7 +64,7 @@ jobs:
           shasum -a 256 "$archive" > "$archive.sha256"
 
       - name: Upload VoiceInk app
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: VoiceInk-${{ github.sha }}-arm64
           path: |
