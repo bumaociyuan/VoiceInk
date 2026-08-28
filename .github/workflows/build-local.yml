@@ -31,6 +31,9 @@ jobs:
           xcodebuild -version
           xcrun swift --version
 
+      - name: Install Metal toolchain
+        run: xcodebuild -downloadComponent MetalToolchain
+
       - name: Cache whisper.cpp framework
         uses: actions/cache@v4
         with:
